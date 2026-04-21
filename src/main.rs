@@ -10,11 +10,13 @@ mod lexer;
 mod error;
 mod parser;
 mod token;
+mod fa;
 
 use std::{env, process};
 use lexer::{RegExLexer};
 use error::{RegExError};
 use parser::{RegExParser};
+use fa::{Nfa};
 
 fn main() -> Result<(), RegExError> {
     // check the command line arguments
@@ -29,6 +31,7 @@ fn main() -> Result<(), RegExError> {
     let tokens = lexer.emit_tokens();
     let  mut parser = RegExParser::new(tokens);
     let ast = parser.parse_expr()?;
-    println!("{:?}", ast);
+    let mut nfa = Nfa::new();
+    let fragment = nfa.build(&ast);
     Ok(())
 }
