@@ -12,7 +12,7 @@ mod parser;
 mod token;
 mod fa;
 
-use std::{env, process};
+use std::{env, fs, process};
 use lexer::{RegExLexer};
 use error::{RegExError};
 use parser::{RegExParser};
@@ -27,11 +27,15 @@ fn main() -> Result<(), RegExError> {
         process::exit(0);
     }
 
+    // we will try to read the file
+    let contents = fs::read_to_string(&args[2])?;
     let mut lexer = RegExLexer::init(args[1].chars().collect());
     let tokens = lexer.emit_tokens();
     let  mut parser = RegExParser::new(tokens);
     let ast = parser.parse_expr()?;
-    let mut nfa = Nfa::new();
-    let fragment = nfa.build(&ast);
+    let mut nfa = Nfa::new(&ast);
+    for (start, end, line) in nfa.search(&contents) {
+        println!("Line[{}]: {}", line, &contents[start..end]);
+    }
     Ok(())
 }
